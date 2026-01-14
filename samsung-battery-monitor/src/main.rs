@@ -10,16 +10,16 @@
 // Kernel: Linux 6.14+
 // Notification Daemon: swaync
 
+use signal_hook::consts::{SIGINT, SIGTERM};
+use signal_hook::flag;
 use std::fs;
 use std::io;
 use std::path::Path;
 use std::process::Command;
-use std::thread;
-use std::time::Duration;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use signal_hook::consts::{SIGTERM, SIGINT};
-use signal_hook::flag;
+use std::thread;
+use std::time::Duration;
 
 // ============================================================================
 // CONFIGURATION (compile-time configurable via environment variables)
@@ -31,7 +31,7 @@ const AC_ADAPTER_PATH: &str = "/sys/class/power_supply/ADP1";
 // Configurable thresholds - set via env vars at compile time (e.g., LOW_THRESHOLD=9)
 const POLL_INTERVAL_SECS: u64 = match option_env!("POLL_INTERVAL") {
     Some(v) => konst::result::unwrap_ctx!(konst::primitive::parse_u64(v)),
-    None => 60,
+    None => 120,
 };
 const LOW_BATTERY_THRESHOLD: u8 = match option_env!("LOW_THRESHOLD") {
     Some(v) => konst::result::unwrap_ctx!(konst::primitive::parse_u8(v)),
@@ -52,25 +52,25 @@ const RESET_THRESHOLD: u8 = match option_env!("RESET_THRESHOLD") {
 
 #[derive(Debug, Clone)]
 struct BatteryStatus {
-    capacity: u8,              // Battery percentage (0-100)
-    status: String,            // "Charging", "Discharging", "Full", "Not charging"
-    charge_now: u64,           // Current charge in µAh
+    capacity: u8,    // Battery percentage (0-100)
+    status: String,  // "Charging", "Discharging", "Full", "Not charging"
+    charge_now: u64, // Current charge in µAh
     #[allow(dead_code)]
-    charge_full: u64,          // Full charge capacity in µAh (reserved for future health monitoring)
-    current_now: u64,          // Current draw in µA
-    voltage_now: u64,          // Current voltage in µV
-    ac_online: bool,           // Is AC adapter connected?
+    charge_full: u64, // Full charge capacity in µAh (reserved for future health monitoring)
+    current_now: u64, // Current draw in µA
+    voltage_now: u64, // Current voltage in µV
+    ac_online: bool, // Is AC adapter connected?
 }
 
 #[derive(Debug)]
 struct BatteryStats {
-    power_draw_watts: f64,     // Current power consumption in watts
+    power_draw_watts: f64,            // Current power consumption in watts
     time_remaining_mins: Option<u32>, // Estimated time remaining (None if charging)
 }
 
 #[derive(Debug, Default)]
 struct NotificationState {
-    low_battery_notified: bool,     // Have we sent low battery notification?
+    low_battery_notified: bool,      // Have we sent low battery notification?
     critical_battery_notified: bool, // Have we sent critical battery notification?
 }
 
@@ -80,8 +80,7 @@ struct NotificationState {
 
 /// Read a sysfs file and return its contents as a trimmed string
 fn read_sysfs_file(path: &str) -> io::Result<String> {
-    fs::read_to_string(path)
-        .map(|s| s.trim().to_string())
+    fs::read_to_string(path).map(|s| s.trim().to_string())
 }
 
 /// Read a sysfs file and parse it as a u64
@@ -100,8 +99,7 @@ fn read_sysfs_u8(path: &str) -> io::Result<u8> {
 
 /// Read a sysfs file and parse it as a boolean (0=false, 1=true)
 fn read_sysfs_bool(path: &str) -> io::Result<bool> {
-    read_sysfs_file(path)
-        .map(|s| s == "1")
+    read_sysfs_file(path).map(|s| s == "1")
 }
 
 // ============================================================================
@@ -117,7 +115,7 @@ fn read_battery_status() -> io::Result<BatteryStatus> {
     if !battery_path.exists() {
         return Err(io::Error::new(
             io::ErrorKind::NotFound,
-            format!("Battery device not found at {}", BATTERY_PATH)
+            format!("Battery device not found at {}", BATTERY_PATH),
         ));
     }
 
@@ -155,7 +153,8 @@ fn read_battery_status() -> io::Result<BatteryStatus> {
 /// Calculate battery statistics (power draw, time remaining)
 fn calculate_battery_stats(status: &BatteryStatus) -> BatteryStats {
     // Power draw in watts = (current_µA * voltage_µV) / 1,000,000,000,000
-    let power_draw_watts = (status.current_now as f64 * status.voltage_now as f64) / 1_000_000_000_000.0;
+    let power_draw_watts =
+        (status.current_now as f64 * status.voltage_now as f64) / 1_000_000_000_000.0;
 
     // Time remaining estimation (only when discharging)
     let time_remaining_mins = if status.status == "Discharging" && status.current_now > 0 {
@@ -192,7 +191,10 @@ fn send_notification(title: &str, body: &str, urgency: &str) -> io::Result<()> {
         .output()?;
 
     if !output.status.success() {
-        eprintln!("notify-send failed: {}", String::from_utf8_lossy(&output.stderr));
+        eprintln!(
+            "notify-send failed: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
     }
 
     Ok(())
@@ -212,40 +214,36 @@ fn format_time_remaining(minutes: u32) -> String {
 
 /// Send low battery notification (9% threshold)
 fn notify_low_battery(status: &BatteryStatus, stats: &BatteryStats) -> io::Result<()> {
-    let mut body = format!("Battery at {}% - Please plug in your charger!", status.capacity);
+    let mut body = "Please plug in your charger!".to_string();
 
     // Add power draw
-    body.push_str(&format!("\nPower draw: {:.1}W", stats.power_draw_watts));
+    body.push_str(&format!("\n⚡{:.1}W", stats.power_draw_watts));
 
     // Add time remaining if available
     if let Some(mins) = stats.time_remaining_mins {
-        body.push_str(&format!(" | Time left: ~{}", format_time_remaining(mins)));
+        body.push_str(&format!(" | ⏱️ ~{}", format_time_remaining(mins)));
     }
 
     send_notification(
-        "Low Battery Warning",
+        &format!("Low Battery Warning ({}%)", status.capacity),
         &body,
-        "critical"
+        "critical",
     )
 }
 
 /// Send critical battery notification (5% threshold)
-fn notify_critical_battery(status: &BatteryStatus, stats: &BatteryStats) -> io::Result<()> {
-    let mut body = format!("CRITICAL: Battery at {}%! System will shutdown soon!", status.capacity);
+fn notify_critical_battery(stats: &BatteryStats) -> io::Result<()> {
+    let mut body = "⚠️System will shutdown soon!".to_string();
 
     // Add power draw
-    body.push_str(&format!("\nPower: {:.1}W", stats.power_draw_watts));
+    body.push_str(&format!("\n⚡ {:.1}W", stats.power_draw_watts));
 
     // Add time remaining if available
     if let Some(mins) = stats.time_remaining_mins {
-        body.push_str(&format!(" | ~{} remaining", format_time_remaining(mins)));
+        body.push_str(&format!(" | ⏱️ ~{} remaining", format_time_remaining(mins)));
     }
 
-    send_notification(
-        "CRITICAL Battery Level",
-        &body,
-        "critical"
-    )
+    send_notification("CRITICAL Battery Level", &body, "critical")
 }
 
 // ============================================================================
@@ -263,8 +261,10 @@ fn update_notification_state(
     // Reset notification state when battery is charging or above reset threshold
     if status.ac_online || status.capacity >= RESET_THRESHOLD {
         if state.low_battery_notified || state.critical_battery_notified {
-            eprintln!("[INFO] Battery recovering: {}% (AC: {})",
-                     status.capacity, status.ac_online);
+            eprintln!(
+                "[INFO] Battery recovering: {}% (AC: {})",
+                status.capacity, status.ac_online
+            );
             state.low_battery_notified = false;
             state.critical_battery_notified = false;
         }
@@ -274,9 +274,12 @@ fn update_notification_state(
     // Critical battery notification (5% and below)
     if is_discharging && status.capacity <= CRITICAL_BATTERY_THRESHOLD {
         // Always send critical notifications (persistent nagging)
-        notify_critical_battery(status, stats)?;
+        notify_critical_battery(stats)?;
         state.critical_battery_notified = true;
-        eprintln!("[CRITICAL] Battery at {}% - Critical notification sent", status.capacity);
+        eprintln!(
+            "[CRITICAL] Battery at {}% - Critical notification sent",
+            status.capacity
+        );
         return Ok(());
     }
 
@@ -285,7 +288,10 @@ fn update_notification_state(
         // Always send low battery notifications (persistent nagging)
         notify_low_battery(status, stats)?;
         state.low_battery_notified = true;
-        eprintln!("[WARNING] Battery at {}% - Low battery notification sent", status.capacity);
+        eprintln!(
+            "[WARNING] Battery at {}% - Low battery notification sent",
+            status.capacity
+        );
         return Ok(());
     }
 
@@ -301,7 +307,10 @@ fn monitor_battery(shutdown_flag: Arc<AtomicBool>) -> io::Result<()> {
     eprintln!("[INFO] Battery monitor started");
     eprintln!("[INFO] Monitoring: {}", BATTERY_PATH);
     eprintln!("[INFO] Low battery threshold: {}%", LOW_BATTERY_THRESHOLD);
-    eprintln!("[INFO] Critical battery threshold: {}%", CRITICAL_BATTERY_THRESHOLD);
+    eprintln!(
+        "[INFO] Critical battery threshold: {}%",
+        CRITICAL_BATTERY_THRESHOLD
+    );
     eprintln!("[INFO] Poll interval: {}s", POLL_INTERVAL_SECS);
 
     let mut notification_state = NotificationState::default();
@@ -312,7 +321,7 @@ fn monitor_battery(shutdown_flag: Arc<AtomicBool>) -> io::Result<()> {
         eprintln!("[ERROR] This monitor is designed for Samsung Galaxy Book5 Pro");
         return Err(io::Error::new(
             io::ErrorKind::NotFound,
-            "Battery device not found"
+            "Battery device not found",
         ));
     }
 
@@ -332,11 +341,15 @@ fn monitor_battery(shutdown_flag: Arc<AtomicBool>) -> io::Result<()> {
                 );
 
                 if let Some(mins) = stats.time_remaining_mins {
-                    eprintln!("[STATUS] Estimated time remaining: {}", format_time_remaining(mins));
+                    eprintln!(
+                        "[STATUS] Estimated time remaining: {}",
+                        format_time_remaining(mins)
+                    );
                 }
 
                 // Update notification state and send notifications if needed
-                if let Err(e) = update_notification_state(&status, &stats, &mut notification_state) {
+                if let Err(e) = update_notification_state(&status, &stats, &mut notification_state)
+                {
                     eprintln!("[ERROR] Failed to send notification: {}", e);
                 }
             }
@@ -369,8 +382,7 @@ fn main() {
     // Register SIGTERM and SIGINT handlers
     flag::register(SIGTERM, Arc::clone(&shutdown_flag))
         .expect("Failed to register SIGTERM handler");
-    flag::register(SIGINT, Arc::clone(&shutdown_flag))
-        .expect("Failed to register SIGINT handler");
+    flag::register(SIGINT, Arc::clone(&shutdown_flag)).expect("Failed to register SIGINT handler");
 
     eprintln!("=============================================================");
     eprintln!("  Samsung Galaxy Book5 Pro Battery Monitor");

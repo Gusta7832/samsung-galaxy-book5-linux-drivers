@@ -29,12 +29,13 @@ Production-quality battery monitoring daemon for Samsung Galaxy Book5 Pro runnin
 ```bash
 cd ~/dev/drivers/samsung-battery-monitor
 chmod +x install.sh
-./install.sh                    # Uses defaults (9%, 5%, 60s)
+./install.sh                    # Uses defaults (9%, 5%, 120s)
 # OR with custom thresholds:
 ./install.sh --low 15 --critical 10 --poll 45
 ```
 
 The installation script will:
+
 1. Build the Rust binary in release mode
 2. Install to `~/.local/bin/battery-monitor`
 3. Install systemd service to `~/.config/systemd/user/`
@@ -105,7 +106,7 @@ Options:
   -l, --low NUM         Low battery threshold % (default: 9)
   -c, --critical NUM    Critical battery threshold % (default: 5)
   -r, --reset NUM       Reset notification state when above % (default: 15)
-  -p, --poll NUM        Poll interval in seconds (default: 60)
+  -p, --poll NUM        Poll interval in seconds (default: 120)
   -h, --help            Show help
 ```
 
@@ -165,17 +166,20 @@ systemctl --user stop battery-monitor
 ### Notification Logic
 
 1. **Normal State** (>15% battery):
+
    - No notifications sent
-   - Battery status logged every 60 seconds
+   - Battery status logged every 120 seconds
 
 2. **Low Battery State** (≤9%, >5%):
+
    - First notification sent immediately
-   - Persistent notifications every 60 seconds while discharging
+   - Persistent notifications every 120 seconds while discharging
    - Shows: percentage, power draw, estimated time remaining
 
 3. **Critical Battery State** (≤5%):
+
    - Urgent critical notification
-   - Persistent nagging every 60 seconds
+   - Persistent nagging every 120 seconds
    - Warning: "System will shutdown soon!"
 
 4. **Recovery** (AC plugged in OR battery >15%):
@@ -287,16 +291,19 @@ journalctl --user -u battery-monitor -f
 ## Future Enhancements (Planned)
 
 ### Phase 2: Battery Health Monitoring
+
 - Track charge cycle history
 - Monitor capacity degradation
 - Export statistics to CSV/JSON
 
 ### Phase 3: Charge Threshold Control
+
 - Set maximum charge limit (e.g., 80%) to extend battery life
 - Requires reverse-engineering Samsung EC interface
 - ACPI/WMI driver development needed
 
 ### Phase 4: Power Profile Integration
+
 - Automatic power profile switching
 - Integration with TLP or power-profiles-daemon
 - Waybar module for visual battery status
@@ -316,6 +323,7 @@ Battery Monitor Contributors
 ## Platform Support
 
 **Tested On:**
+
 - Samsung Galaxy Book5 Pro (940XHA)
 - Ubuntu 25.04
 - Linux kernel 6.14.0-37-generic
@@ -323,6 +331,7 @@ Battery Monitor Contributors
 - swaync 0.10.1
 
 **Should Work On:**
+
 - Any Samsung laptop with standard ACPI battery interface
 - Any Linux distribution with systemd
 - Any Wayland compositor with notification daemon support

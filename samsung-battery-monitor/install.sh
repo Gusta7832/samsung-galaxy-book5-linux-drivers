@@ -17,13 +17,13 @@
 #   -p, --poll NUM        Poll interval in seconds (default: 60)
 #   -h, --help            Show this help message
 
-set -e  # Exit on error
+set -e # Exit on error
 
 # Default configuration values
 LOW_THRESHOLD="${LOW_THRESHOLD:-9}"
 CRITICAL_THRESHOLD="${CRITICAL_THRESHOLD:-5}"
 RESET_THRESHOLD="${RESET_THRESHOLD:-15}"
-POLL_INTERVAL="${POLL_INTERVAL:-60}"
+POLL_INTERVAL="${POLL_INTERVAL:-120}"
 
 # Color output
 RED='\033[0;31m'
@@ -42,11 +42,11 @@ show_help() {
     echo "  -l, --low NUM         Low battery threshold % (default: 9)"
     echo "  -c, --critical NUM    Critical battery threshold % (default: 5)"
     echo "  -r, --reset NUM       Reset notification state when above % (default: 15)"
-    echo "  -p, --poll NUM        Poll interval in seconds (default: 60)"
+    echo "  -p, --poll NUM        Poll interval in seconds (default: 120)"
     echo "  -h, --help            Show this help message"
     echo ""
     echo "Examples:"
-    echo "  ./install.sh                           # Use defaults (9%, 5%, 60s)"
+    echo "  ./install.sh                           # Use defaults (9%, 5%, 120s)"
     echo "  ./install.sh -l 15 -c 10               # Low at 15%, critical at 10%"
     echo "  ./install.sh --low 20 --poll 30       # Low at 20%, poll every 30s"
     echo ""
@@ -56,30 +56,30 @@ show_help() {
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
-        -l|--low)
-            LOW_THRESHOLD="$2"
-            shift 2
-            ;;
-        -c|--critical)
-            CRITICAL_THRESHOLD="$2"
-            shift 2
-            ;;
-        -r|--reset)
-            RESET_THRESHOLD="$2"
-            shift 2
-            ;;
-        -p|--poll)
-            POLL_INTERVAL="$2"
-            shift 2
-            ;;
-        -h|--help)
-            show_help
-            ;;
-        *)
-            echo "Unknown option: $1"
-            echo "Use --help for usage information"
-            exit 1
-            ;;
+    -l | --low)
+        LOW_THRESHOLD="$2"
+        shift 2
+        ;;
+    -c | --critical)
+        CRITICAL_THRESHOLD="$2"
+        shift 2
+        ;;
+    -r | --reset)
+        RESET_THRESHOLD="$2"
+        shift 2
+        ;;
+    -p | --poll)
+        POLL_INTERVAL="$2"
+        shift 2
+        ;;
+    -h | --help)
+        show_help
+        ;;
+    *)
+        echo "Unknown option: $1"
+        echo "Use --help for usage information"
+        exit 1
+        ;;
     esac
 done
 
@@ -127,7 +127,7 @@ main() {
     print_header
 
     # Get script directory
-    SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     print_info "Installation directory: $SCRIPT_DIR"
 
     # Check if we're in the right directory
@@ -138,7 +138,7 @@ main() {
 
     # Check for Rust toolchain
     print_info "Checking for Rust toolchain..."
-    if ! command -v cargo &> /dev/null; then
+    if ! command -v cargo &>/dev/null; then
         print_error "Cargo not found. Please install Rust from https://rustup.rs/"
         exit 1
     fi
@@ -146,7 +146,7 @@ main() {
 
     # Check for notify-send
     print_info "Checking for notify-send..."
-    if ! command -v notify-send &> /dev/null; then
+    if ! command -v notify-send &>/dev/null; then
         print_warning "notify-send not found. Notifications may not work."
         print_warning "Install it with: sudo apt install libnotify-bin"
     else
@@ -155,7 +155,7 @@ main() {
 
     # Check for swaync
     print_info "Checking for swaync..."
-    if pgrep -x swaync > /dev/null; then
+    if pgrep -x swaync >/dev/null; then
         print_success "swaync is running"
     else
         print_warning "swaync is not running. Notifications may not be displayed."
@@ -166,10 +166,10 @@ main() {
     print_info "Configuration: low=${LOW_THRESHOLD}%, critical=${CRITICAL_THRESHOLD}%, reset=${RESET_THRESHOLD}%, poll=${POLL_INTERVAL}s"
     cd "$SCRIPT_DIR"
     LOW_THRESHOLD="$LOW_THRESHOLD" \
-    CRITICAL_THRESHOLD="$CRITICAL_THRESHOLD" \
-    RESET_THRESHOLD="$RESET_THRESHOLD" \
-    POLL_INTERVAL="$POLL_INTERVAL" \
-    cargo build --release
+        CRITICAL_THRESHOLD="$CRITICAL_THRESHOLD" \
+        RESET_THRESHOLD="$RESET_THRESHOLD" \
+        POLL_INTERVAL="$POLL_INTERVAL" \
+        cargo build --release
     print_success "Build completed"
 
     # Verify binary exists
