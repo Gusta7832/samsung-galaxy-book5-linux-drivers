@@ -1,0 +1,117 @@
+================================================================================
+  SAMSUNG GALAXY BOOK5 PRO - CHARGE THRESHOLD INVESTIGATION STATUS
+================================================================================
+
+HARDWARE CONFIRMED:
+-------------------
+  Model:    940XHA (Samsung Galaxy Book5 Pro)
+  Vendor:   SAMSUNG ELECTRONICS CO., LTD.
+  Board:    NP940XHA-LG3IN
+  Battery:  SR Real Battery (SAMSUNG Electronics, 4000mAh Li-ion)
+  Kernel:   Linux 6.14.0-37-generic
+  OS:       Ubuntu 25.04 with Hyprland
+
+
+CRITICAL DISCOVERY:
+-------------------
+  ✓ Samsung WMI GUID C16C47BA-50E3-444A-AF3A-B1C348380002 FOUND
+  ✓ Samsung WMI GUID A6FEA33E-DABF-46F5-BFC8-460D961BEC9F FOUND
+  ✗ No charge_control_end_threshold sysfs attribute (no driver loaded)
+  ✗ No samsung-laptop or samsung-galaxybook module loaded
+
+
+WHAT THIS MEANS:
+----------------
+Your laptop HAS the firmware interface for battery control, but Linux has no
+driver to use it. The two Samsung WMI GUIDs detected are the same ones used
+on other Samsung laptops for platform control including battery charging limits.
+
+
+INVESTIGATION PLAN:
+-------------------
+  [COMPLETED] Phase 1: WMI device enumeration
+              → FOUND: 2 Samsung-specific WMI devices
+              → Files: wmi_devices.txt, WMI_ANALYSIS.md
+
+  [NEXT STEP] Phase 2: ACPI table extraction and analysis
+              → Scripts ready: extract_all.sh, analyze_acpi.sh
+              → YOU NEED TO RUN THESE (requires sudo for acpidump)
+
+  [PENDING]   Phase 3: Interface identification
+              → Locate exact WMI method calls for battery control
+              → Map EC registers if needed
+
+  [PENDING]   Phase 4: Safe testing with acpi_call module
+              → Test read-only methods first
+              → Validate charge threshold get/set protocol
+
+  [PENDING]   Phase 5: Kernel driver development
+              → Write platform driver for sysfs interface
+              → Implement charge_control_end_threshold attribute
+
+  [PENDING]   Phase 6: Integration with battery monitor
+              → Add threshold control to Rust daemon
+              → Configuration file support
+
+
+YOUR NEXT ACTIONS (TAKES 5 MINUTES):
+-------------------------------------
+  1. sudo apt install -y acpica-tools
+  2. cd ~/dev/drivers/samsung-acpi-investigation
+  3. ./extract_all.sh
+  4. ./analyze_acpi.sh
+  5. cat acpi_analysis.txt
+  6. Share the acpi_analysis.txt output
+
+
+AFTER YOU RUN THE SCRIPTS:
+---------------------------
+I will:
+  - Analyze the ACPI tables
+  - Identify the battery control WMI method signature
+  - Design the kernel driver
+  - Provide testing instructions
+  - Implement the charge threshold driver
+
+Estimated time to working driver: 1-3 days after ACPI analysis
+
+
+FILES IN THIS DIRECTORY:
+-------------------------
+  INSTRUCTIONS.txt     - Quick start guide
+  STATUS.txt           - This file (current status)
+  README.md            - Detailed documentation
+  WMI_ANALYSIS.md      - WMI device findings
+  wmi_devices.txt      - WMI enumeration results
+  extract_all.sh       - ACPI extraction script (RUN THIS FIRST)
+  analyze_acpi.sh      - ACPI analysis script (RUN THIS SECOND)
+
+
+CONFIDENCE LEVEL:
+-----------------
+  95% - Battery charge threshold control is achievable
+
+  Evidence:
+    ✓ Feature works on Windows (firmware supports it)
+    ✓ Known Samsung WMI GUIDs detected
+    ✓ Similar Samsung laptops have Linux drivers
+    ✓ Standard WMI/ACPI interfaces present
+
+
+RISK LEVEL:
+-----------
+  Current phase: ZERO RISK (read-only analysis)
+  
+  All current scripts only READ data, no hardware writes.
+  We will not write to EC registers until:
+    - ACPI tables fully analyzed
+    - Methods validated
+    - Safe testing procedure established
+    - You explicitly approve each test
+
+
+READY TO PROCEED?
+-----------------
+Run: ./extract_all.sh
+
+================================================================================

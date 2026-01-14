@@ -1,0 +1,344 @@
+=== Samsung WMI GUID Locations ===
+
+Searching for GUID: C16C47BA-50E3-444A-AF3A-B1C348380002
+
+Searching for GUID: A6FEA33E-DABF-46F5-BFC8-460D961BEC9F
+
+=== Embedded Controller (EC) Devices ===
+
+dsdt.dsl:12341:        Device (HECI)
+dsdt.dsl:12370:        Device (HEC3)
+dsdt.dsl:27333:        Device (H_EC)
+dsdt.dsl:27335:            Name (_HID, EisaId ("PNP0C09") /* Embedded Controller Device */)  // _HID: Hardware ID
+dsdt.dsl:27419:        Device (ECMX)
+
+=== Battery-Related ACPI Methods ===
+
+
+=== WMI Method Definitions ===
+
+dsdt.dsl:21085:            Method (WMDE, 3, NotSerialized)
+dsdt.dsl:21283:            Method (WMDE, 3, NotSerialized)
+dsdt.dsl:25211:    Method (SAWM, 2, Serialized)
+dsdt.dsl:26904:            Method (WM01, 3, NotSerialized)
+
+=== Charge/Threshold Related Strings ===
+
+dsdt.dsl:31967:            Method (_NTT, 0, NotSerialized)  // _NTT: Notification Temperature Threshold
+dsdt.dsl:32022:            Method (_NTT, 0, NotSerialized)  // _NTT: Notification Temperature Threshold
+dsdt.dsl:32077:            Method (_NTT, 0, NotSerialized)  // _NTT: Notification Temperature Threshold
+ssdt12.dsl:1166:        Method (_NTT, 0, NotSerialized)  // _NTT: Notification Temperature Threshold
+ssdt12.dsl:1337:        Method (_TDL, 0, NotSerialized)  // _TDL: T-State Depth Limit
+ssdt12.dsl:1356:        Method (_PDL, 0, NotSerialized)  // _PDL: P-state Depth Limit
+
+=== Samsung Device Identifiers ===
+
+dsdt.dsl:25324:            Name (_HID, EisaId ("SAM0430"))  // _HID: Hardware ID
+dsdt.dsl:28299:                "SAMSUNG Electronics"
+dsdt.dsl:28322:                "SAMSUNG Electronics"
+
+=== SSDT Table Summary ===
+
+File: ssdt10.dsl
+ *     OEM Table ID     "TbtTypeC"
+ *     OEM Revision     0x00000000 (0)
+
+File: ssdt11.dsl
+ *     OEM Table ID     "ApHwp"
+ *     OEM Revision     0x00003000 (12288)
+
+File: ssdt12.dsl
+ *     OEM Table ID     "DptfTabl"
+ *     OEM Revision     0x00001000 (4096)
+
+File: ssdt13.dsl
+ *     OEM Table ID     "LnlMRvp1"
+ *     OEM Revision     0x00001000 (4096)
+
+File: ssdt14.dsl
+ *     OEM Table ID     "Cpu0Cst"
+ *     OEM Revision     0x00003001 (12289)
+
+File: ssdt15.dsl
+ *     OEM Table ID     "MiCaTabl"
+ *     OEM Revision     0x00001000 (4096)
+
+File: ssdt16.dsl
+ *     OEM Table ID     "IpuSsdt"
+ *     OEM Revision     0x00001000 (4096)
+
+File: ssdt17.dsl
+ *     OEM Table ID     "St00Ssdt"
+ *     OEM Revision     0x00001000 (4096)
+
+File: ssdt18.dsl
+ *     OEM Table ID     "PepoSsdt"
+ *     OEM Revision     0x00001000 (4096)
+
+File: ssdt19.dsl
+ *     OEM Table ID     "TseSsdt"
+ *     OEM Revision     0x00001000 (4096)
+
+File: ssdt1.dsl
+ *     OEM Table ID     "Pmax_Dev"
+ *     OEM Revision     0x00000001 (1)
+
+File: ssdt20.dsl
+ *     OEM Table ID     "SocCmn "
+ *     OEM Revision     0x00003000 (12288)
+
+File: ssdt21.dsl
+ *     OEM Table ID     "CpuSsdt"
+ *     OEM Revision     0x00003000 (12288)
+
+File: ssdt22.dsl
+ *     OEM Table ID     "Cpu0Hwp"
+ *     OEM Revision     0x00003000 (12288)
+
+File: ssdt23.dsl
+ *     OEM Table ID     "xh_lnl_m"
+ *     OEM Revision     0x00000000 (0)
+
+File: ssdt24.dsl
+ *     OEM Table ID     "ApPsd"
+ *     OEM Revision     0x00003000 (12288)
+
+File: ssdt25.dsl
+ *     OEM Table ID     "PDatTabl"
+ *     OEM Revision     0x00001000 (4096)
+
+File: ssdt26.dsl
+ *     OEM Table ID     "PtidDevc"
+ *     OEM Revision     0x00001000 (4096)
+
+File: ssdt27.dsl
+ *     OEM Table ID     "ApIst"
+ *     OEM Revision     0x00003000 (12288)
+
+File: ssdt2.dsl
+ *     OEM Table ID     "TxtSsdt"
+ *     OEM Revision     0x00001000 (4096)
+
+File: ssdt3.dsl
+ *     OEM Table ID     "TcssSsdt"
+ *     OEM Revision     0x00001000 (4096)
+
+File: ssdt4.dsl
+ *     OEM Table ID     "Cnv_Ssdt"
+ *     OEM Revision     0x00001000 (4096)
+
+File: ssdt5.dsl
+ *     OEM Table ID     "IgfxSsdt"
+ *     OEM Revision     0x00003000 (12288)
+
+File: ssdt6.dsl
+ *     OEM Table ID     "Cpu0Psd"
+ *     OEM Revision     0x00003000 (12288)
+
+File: ssdt7.dsl
+ *     OEM Table ID     "SocGpe "
+ *     OEM Revision     0x00003000 (12288)
+
+File: ssdt8.dsl
+ *     OEM Table ID     "ApCst"
+ *     OEM Revision     0x00003000 (12288)
+
+File: ssdt9.dsl
+ *     OEM Table ID     "Cpu0Ist"
+ *     OEM Revision     0x00003000 (12288)
+
+=== EC Operation Regions (Register Maps) ===
+
+dsdt.dsl:        OperationRegion (ECMB, SystemIO, 0x0A00, 0x08)
+dsdt.dsl-        Field (ECMB, ByteAcc, NoLock, Preserve)
+dsdt.dsl-        {
+dsdt.dsl-            ECM0,   8, 
+dsdt.dsl-            ECM1,   8
+dsdt.dsl-        }
+dsdt.dsl-
+dsdt.dsl-        Name (MBUF, Buffer (0x1E)
+dsdt.dsl-        {
+dsdt.dsl-            /* 0000 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // ........
+dsdt.dsl-            /* 0008 */  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // ........
+--
+dsdt.dsl:        OperationRegion (ECRM, EmbeddedControl, Zero, 0xFF)
+dsdt.dsl-        Field (ECRM, ByteAcc, Lock, Preserve)
+dsdt.dsl-        {
+dsdt.dsl-            NTYR,   8
+dsdt.dsl-        }
+dsdt.dsl-
+dsdt.dsl:        OperationRegion (ECR, SystemMemory, 0xFE0B0000, 0x0100)
+dsdt.dsl-        Field (ECR, AnyAcc, NoLock, Preserve)
+dsdt.dsl-        {
+dsdt.dsl-            Offset (0x10), 
+dsdt.dsl-            VERS,   16, 
+dsdt.dsl-            Offset (0x14), 
+dsdt.dsl-            CCI0,   8, 
+dsdt.dsl-            CCI1,   8, 
+dsdt.dsl-            CCI2,   8, 
+dsdt.dsl-            CCI3,   8, 
+dsdt.dsl-            CTL0,   8, 
+--
+dsdt.dsl:        OperationRegion (ECEM, SystemMemory, 0xFE0B2000, 0x2000)
+dsdt.dsl-        Field (ECEM, AnyAcc, NoLock, Preserve)
+dsdt.dsl-        {
+dsdt.dsl-            Offset (0x100), 
+dsdt.dsl-            HEAD,   128, 
+dsdt.dsl-            PSTN,   16, 
+dsdt.dsl-            PCNT,   16, 
+dsdt.dsl-            CNTC,   32, 
+dsdt.dsl-            CBTP,   8, 
+dsdt.dsl-            SLPP,   8, 
+dsdt.dsl-            SOBF,   16, 
+--
+ssdt4.dsl:                OperationRegion (VSEC, SystemMemory, (GMIO (\_SB.PC00.RP01.PBNU, \_SB.PC00.RP01._ADR (), \_SB.PC00.RP01.PXSX._ADR ()) + WVHO), 0x10)
+ssdt4.dsl-                Field (VSEC, AnyAcc, NoLock, Preserve)
+ssdt4.dsl-                {
+ssdt4.dsl-                    Offset (0x0C), 
+ssdt4.dsl-                        ,   1, 
+ssdt4.dsl-                    BTIE,   1, 
+ssdt4.dsl-                        ,   1, 
+ssdt4.dsl-                        ,   1, 
+
+=== EC Field Definitions (Potential Registers) ===
+
+dsdt.dsl:                CreateDWordField (BUF0, \_SB.PC00._Y10._LEN, ECLN)  // _LEN: Length
+dsdt.dsl:                CreateBitField (BUF0, \_SB.PC00._Y10._RW, ECRW)  // _RW_: Read-Write Status
+dsdt.dsl-                CreateDWordField (BUF0, \_SB.PC00._Y11._LEN, F0LN)  // _LEN: Length
+dsdt.dsl-                CreateBitField (BUF0, \_SB.PC00._Y11._RW, F0RW)  // _RW_: Read-Write Status
+dsdt.dsl-            CreateDWordField (BUF0, \_SB.PC00._Y12._MIN, M1MN)  // _MIN: Minimum Base Address
+dsdt.dsl-            CreateDWordField (BUF0, \_SB.PC00._Y12._MAX, M1MX)  // _MAX: Maximum Base Address
+dsdt.dsl-            CreateDWordField (BUF0, \_SB.PC00._Y12._LEN, M1LN)  // _LEN: Length
+dsdt.dsl:        Field (ECMB, ByteAcc, NoLock, Preserve)
+dsdt.dsl:        Field (ECRM, ByteAcc, Lock, Preserve)
+dsdt.dsl:        Field (ECR, AnyAcc, NoLock, Preserve)
+dsdt.dsl-            Offset (0x10), 
+dsdt.dsl-            Offset (0x14), 
+dsdt.dsl:        Field (ECEM, AnyAcc, NoLock, Preserve)
+dsdt.dsl-            Offset (0x100), 
+dsdt.dsl-            Offset (0x200), 
+dsdt.dsl-            Offset (0x600), 
+dsdt.dsl-            Offset (0x1C00), 
+dsdt.dsl-            Offset (0x2000)
+ssdt4.dsl:                Field (VSEC, AnyAcc, NoLock, Preserve)
+ssdt4.dsl-                    Offset (0x0C), 
+ssdt4.dsl-                    Offset (0x0D), 
+ssdt4.dsl:                Field (VSEC, AnyAcc, NoLock, Preserve)
+ssdt4.dsl-                    Offset (0x0C), 
+ssdt4.dsl-                    Offset (0x0D), 
+ssdt4.dsl:                Field (VSEC, AnyAcc, NoLock, Preserve)
+ssdt4.dsl-                    Offset (0x0C), 
+ssdt4.dsl-                    Offset (0x0D), 
+ssdt4.dsl:                Field (VSEC, AnyAcc, NoLock, Preserve)
+ssdt4.dsl-                    Offset (0x0C), 
+ssdt4.dsl-                    Offset (0x0D), 
+ssdt4.dsl:                Field (VSEC, AnyAcc, NoLock, Preserve)
+ssdt4.dsl-                    Offset (0x0C), 
+ssdt4.dsl-                    Offset (0x0D), 
+ssdt4.dsl:                Field (VSEC, AnyAcc, NoLock, Preserve)
+ssdt4.dsl-                    Offset (0x0C), 
+ssdt4.dsl-                    Offset (0x0D), 
+
+=== _DSM Methods (Device Specific Methods) ===
+
+dsdt.dsl-                Name (_ADR, 0x00020000)  // _ADR: Address
+dsdt.dsl-            }
+dsdt.dsl-
+dsdt.dsl-            Device (TCPU)
+dsdt.dsl-            {
+dsdt.dsl:                Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
+dsdt.dsl-                {
+dsdt.dsl-                    If (PCIC (Arg0))
+dsdt.dsl-                    {
+dsdt.dsl-                        Return (PCID (Arg0, Arg1, Arg2, Arg3))
+dsdt.dsl-                    }
+dsdt.dsl-
+dsdt.dsl-                    Return (Buffer (One)
+dsdt.dsl-                    {
+dsdt.dsl-                         0x00                                             // .
+dsdt.dsl-                    })
+dsdt.dsl-                }
+dsdt.dsl-
+dsdt.dsl-                Name (_ADR, 0x00040000)  // _ADR: Address
+dsdt.dsl-            }
+dsdt.dsl-
+--
+dsdt.dsl-    Scope (_SB.PC00)
+dsdt.dsl-    {
+dsdt.dsl-        Name (TEMP, Zero)
+dsdt.dsl-        Scope (LPCB)
+dsdt.dsl-        {
+dsdt.dsl:            Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
+dsdt.dsl-            {
+dsdt.dsl-                If (PCIC (Arg0))
+dsdt.dsl-                {
+dsdt.dsl-                    Return (PCID (Arg0, Arg1, Arg2, Arg3))
+dsdt.dsl-                }
+dsdt.dsl-
+dsdt.dsl-                Return (Buffer (One)
+dsdt.dsl-                {
+dsdt.dsl-                     0x00                                             // .
+dsdt.dsl-                })
+dsdt.dsl-            }
+dsdt.dsl-
+dsdt.dsl-            OperationRegion (LPC, PCI_Config, Zero, 0x0100)
+dsdt.dsl-            Field (LPC, AnyAcc, NoLock, Preserve)
+dsdt.dsl-            {
+--
+dsdt.dsl-        }
+dsdt.dsl-
+dsdt.dsl-        Device (SBUS)
+dsdt.dsl-        {
+dsdt.dsl-            Name (_ADR, 0x001F0004)  // _ADR: Address
+dsdt.dsl:            Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
+dsdt.dsl-            {
+dsdt.dsl-                If (PCIC (Arg0))
+dsdt.dsl-                {
+dsdt.dsl-                    Return (PCID (Arg0, Arg1, Arg2, Arg3))
+dsdt.dsl-                }
+dsdt.dsl-
+dsdt.dsl-                Return (Buffer (One)
+dsdt.dsl-                {
+dsdt.dsl-                     0x00                                             // .
+dsdt.dsl-                })
+dsdt.dsl-            }
+dsdt.dsl-        }
+dsdt.dsl-    }
+dsdt.dsl-
+dsdt.dsl-    Scope (\)
+--
+dsdt.dsl-            Method (XDBA, 0, NotSerialized)
+dsdt.dsl-            {
+dsdt.dsl-                Return ((XDCB & 0xFFFFFFFFFFFFFF00))
+dsdt.dsl-            }
+dsdt.dsl-
+dsdt.dsl:            Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
+dsdt.dsl-            {
+dsdt.dsl-                If (PCIC (Arg0))
+dsdt.dsl-                {
+dsdt.dsl-                    Return (PCID (Arg0, Arg1, Arg2, Arg3))
+dsdt.dsl-                }
+dsdt.dsl-
+dsdt.dsl-                ADBG ("XDCI DSM")
+dsdt.dsl-                If ((Arg0 == ToUUID ("732b85d5-b7a7-4a1b-9ba0-4bbd00ffd511") /* Unknown UUID */))
+dsdt.dsl-                {
+dsdt.dsl-                    If ((Arg1 == One))
+dsdt.dsl-                    {
+dsdt.dsl-                        Method (SPPS, 2, Serialized)
+dsdt.dsl-                        {
+dsdt.dsl-                            OperationRegion (XDBW, SystemMemory, XDBA (), 0x00110000)
+dsdt.dsl-                            Field (XDBW, WordAcc, NoLock, Preserve)
+--
+dsdt.dsl-                Method (_PRW, 0, NotSerialized)  // _PRW: Power Resources for Wake
+dsdt.dsl-                {
+dsdt.dsl-                    Return (GPRW (0x86, 0x04))
+dsdt.dsl-                }
+dsdt.dsl-
+dsdt.dsl:                Method (_DSM, 4, Serialized)  // _DSM: Device-Specific Method
+dsdt.dsl-                {
+dsdt.dsl-                    If (PCIC (Arg0))
+dsdt.dsl-                    {
+dsdt.dsl-                        Return (PCID (Arg0, Arg1, Arg2, Arg3))
+dsdt.dsl-                    }
+dsdt.dsl-
+

@@ -1,0 +1,73 @@
+================================================================================
+  SAMSUNG GALAXY BOOK5 PRO - BATTERY CHARGE THRESHOLD INVESTIGATION
+  Quick Start Instructions
+================================================================================
+
+STEP 1: Install ACPI Tools
+---------------------------
+sudo apt install -y acpica-tools
+
+
+STEP 2: Extract ACPI Tables
+----------------------------
+cd ~/dev/drivers/samsung-acpi-investigation
+./extract_all.sh
+
+This will:
+  - Extract all ACPI tables from your firmware
+  - Decompile them to human-readable format
+  - Collect system information
+  - Take about 1-2 minutes
+
+
+STEP 3: Analyze ACPI Tables
+----------------------------
+./analyze_acpi.sh
+
+This will:
+  - Search for Samsung WMI methods
+  - Find EC (Embedded Controller) registers
+  - Locate battery control interfaces
+  - Generate acpi_analysis.txt report
+
+
+STEP 4: Share Results
+----------------------
+cat acpi_analysis.txt
+
+Copy and paste the output so I can:
+  - Identify the battery charge threshold control interface
+  - Design the kernel driver
+  - Provide safe testing instructions
+
+
+CRITICAL FINDING SO FAR:
+------------------------
+Your laptop has TWO confirmed Samsung-specific WMI devices:
+
+  C16C47BA-50E3-444A-AF3A-B1C348380002  (Samsung Settings)
+  A6FEA33E-DABF-46F5-BFC8-460D961BEC9F  (Samsung Platform)
+
+These are KNOWN Samsung interfaces used for battery control on other models.
+The ACPI tables will reveal the exact method calls needed.
+
+
+TIME REQUIRED:
+--------------
+  - ACPI extraction: 2 minutes
+  - Analysis script: 30 seconds
+  - Sharing results: 1 minute
+
+  TOTAL: ~5 minutes of your time
+
+After this, I can develop the driver to enable charge threshold control!
+
+
+QUESTIONS?
+----------
+  - Check README.md for detailed explanation
+  - Check WMI_ANALYSIS.md for current findings
+  - All scripts are safe and read-only (no hardware writes)
+
+
+================================================================================
