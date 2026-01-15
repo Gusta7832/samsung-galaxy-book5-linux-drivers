@@ -1,0 +1,260 @@
+Executive Summary
+
+The Problem: Your laptop's internal speakers use MAX98390 amplifier chips that are declared in firmware but not powered on. Without power, they cannot communicate over I2C, and without I2C communication, no audio driver can control them.
+
+Bottom Line: This is a firmware/driver gap issue, not a configuration problem. The hardware likely exists but Linux lacks the secret handshake to wake it up.
+
+---
+What's Actually Happening
+
+The Audio Path
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                        AUDIO SIGNAL PATH                            │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐      │
+│  │ SOF DSP  │───▶│ ALC298   │───▶│ MAX98390 │───▶│ Speakers │      │
+│  │ (Works)  │    │ (Works)  │    │ (DEAD)   │    │ (Silent) │      │
+│  └──────────┘    └──────────┘    └──────────┘    └──────────┘      │
+│       ✅              ✅              ❌              ❌            │
+│                                                                     │
+│  Headphone path bypasses MAX98390 ─────────────────▶ Works ✅      │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+
+Why MAX98390 Is "Dead"
+┌─────────────────────────────┬─────────────────────────┬───────────────┬─────────────────────────┐
+│       Check Performed       │     Expected Result     │ Actual Result │         Meaning         │
+├─────────────────────────────┼─────────────────────────┼───────────────┼─────────────────────────┤
+│ I2C Device ID read (0x21FE) │ 0x43                    │ 0x00          │ Chip not responding     │
+├─────────────────────────────┼─────────────────────────┼───────────────┼─────────────────────────┤
+│ I2C bus scan                │ Devices at 0x38-0x3D    │ Empty         │ No I2C communication    │
+├─────────────────────────────┼─────────────────────────┼───────────────┼─────────────────────────┤
+│ Driver binding              │ snd_soc_max98390 in use │ 0 references  │ Nothing bound           │
+├─────────────────────────────┼─────────────────────────┼───────────────┼─────────────────────────┤
+│ ACPI Status                 │ 0x0F (Present)          │ 0x0F          │ Firmware says it exists │
+└─────────────────────────────┴─────────────────────────┴───────────────┴─────────────────────────┘
+Interpretation: The chips are declared in ACPI (Samsung put them in the firmware tables), but they're in a low-power state where they don't respond to I2C commands. This is like a phone with the battery in but the power button never pressed.
+
+---
+Root Cause Analysis
+
+Primary Cause: Missing Power Enable Mechanism
+
+The MAX98390 ACPI definition is incomplete:
+
+What Samsung's ACPI declares:
+├── Device exists: YES (MX98 at \_SB.PC00.I2C2)
+├── I2C addresses: YES (0x38, 0x39, 0x3C, 0x3D)
+├── Status: YES (0x0F = Present and Enabled)
+├── Power-on method (_PS0): NO ❌
+├── Power resource: NO ❌
+└── GPIO enable pin: NO ❌
+
+Somewhere, something needs to flip a switch to power these chips. That "something" is either:
+
+1. An EC (Embedded Controller) register - Samsung's secret sauce, undocumented
+2. A GPIO pin - Found gpio-569 labeled "power-enable" but it's locked by camera driver
+3. An HDA verb sequence - What the kernel quirks try to do, but your subsystem ID isn't recognized
+4. A combination of the above - Most likely scenario
+
+Why Windows Works (Presumably)
+
+Windows has Samsung's proprietary driver that knows:
+- Which EC register to write
+- What GPIO sequence to execute
+- Which HDA verbs to send at what timing
+
+This is closed-source, undocumented vendor knowledge.
+
+---
+Probability Assessment
+┌────────────────────────────────────────────────┬─────────────┬──────────────────────────────────────────────────────────────────────────────────────┐
+│                    Scenario                    │ Probability │                                       Evidence                                       │
+├────────────────────────────────────────────────┼─────────────┼──────────────────────────────────────────────────────────────────────────────────────┤
+│ A: Chips exist, need undocumented power enable │ 70%         │ ACPI declaration matches known-working Samsung models; same issue reported by others │
+├────────────────────────────────────────────────┼─────────────┼──────────────────────────────────────────────────────────────────────────────────────┤
+│ B: Chips don't exist (vestigial ACPI)          │ 20%         │ Samsung reuses firmware across models; cheaper models might omit amps                │
+├────────────────────────────────────────────────┼─────────────┼──────────────────────────────────────────────────────────────────────────────────────┤
+│ C: Hardware fault                              │ 10%         │ Would be unusual on new device; I2C bus itself works (other devices respond)         │
+└────────────────────────────────────────────────┴─────────────┴──────────────────────────────────────────────────────────────────────────────────────┘
+---
+What Has Been Tried and Why It Failed
+
+1. HDA GPIO Pins (All 8)
+
+What it does: Toggles GPIO pins on the HDA codec chip
+Why it failed: MAX98390 power is NOT controlled by HDA GPIO. These pins control other things (mic select, jack detect, etc.)
+
+2. I2C Controller Wake
+
+What it does: Brings PCI device 0000:00:15.2 out of suspend
+Why it failed: Waking the I2C controller doesn't power the devices ON the bus. The controller can talk, but nobody's listening.
+
+3. Platform GPIO (gpio-569)
+
+What it does: Attempts to toggle a pin labeled "power-enable"
+Why it failed: This GPIO is claimed by INT3472 (Intel camera power sequencer). Even if forced, it's probably for the camera, not audio.
+
+4. HDA Model Quirks
+
+What it does: Loads predefined codec configurations
+Why it failed: The quirk names (alc298-samsung-amp-v2-*) exist in some kernels but:
+- Your subsystem ID (0x144dca08) isn't in the kernel's quirk table
+- Kernel 6.14 may not have the latest Samsung patches
+
+5. EAPD Toggle
+
+What it does: Sets External Amplifier Power Down bit on HDA codec
+Why it failed: EAPD controls HDA-connected external amps. MAX98390 is on I2C, not HDA bus.
+
+6. Samsung ACPI Methods
+
+What it does: Calls Samsung-specific ACPI methods (SAWS, CSFI, etc.)
+Why it failed: No audio-related commands found. These methods handle keyboard, battery, performance modes—not audio.
+
+---
+Feasibility of Solutions
+
+Option 1: Wait for Upstream Kernel Support
+
+Feasibility: HIGH (but requires patience)
+Effort: None from you
+Timeline: Unknown (could be months)
+
+The patch from josh@joshuagrisham.com (referenced in your log) adds Samsung ALC298 quirks. Check if:
+- Kernel 6.15+ includes it
+- Ubuntu backports it to 6.14
+
+Risk: None. Just waiting.
+
+Option 2: Build Custom Kernel with Patch
+
+Feasibility: MEDIUM
+Effort: Significant (kernel compilation, maintenance burden)
+
+Apply the upstream patch yourself:
+- Get patch from lore.kernel.org
+- Apply to kernel source
+- Compile and install
+
+Risk: LOW if done correctly. You maintain your own kernel.
+
+Option 3: EC Register Reverse Engineering
+
+Feasibility: LOW (high effort, uncertain outcome)
+Effort: Very high (requires systematic probing)
+
+Systematically toggle EC bits in 0x80-0x9F while monitoring I2C response.
+
+Risk: MEDIUM-HIGH
+- Could hang system
+- Could affect other hardware (battery, keyboard, etc.)
+- Could brick EC in worst case (rare but possible)
+
+Option 4: ACPI Override (Custom SSDT)
+
+Feasibility: LOW
+Effort: High (requires ACPI expertise)
+
+Create custom SSDT to inject power methods for MAX98390.
+
+Risk: MEDIUM
+- Wrong ACPI can prevent boot
+- May conflict with existing tables
+
+Option 5: Machine Driver Development
+
+Feasibility: VERY LOW
+Effort: Very high (kernel driver development)
+
+Write a complete ASoC machine driver for this specific laptop.
+
+Risk: LOW (it's just code), but effort is extreme.
+
+Option 6: Contact Upstream/Community
+
+Feasibility: HIGH
+Effort: Low (writing, communicating)
+
+File detailed bug reports with:
+- alsa-devel mailing list
+- SOF Project GitHub
+- samsung-galaxybook-extras GitHub (already has matching issue)
+
+Risk: None. Best ROI action.
+
+---
+Risk Analysis Matrix
+┌────────────────────────────┬──────────────────┬─────────────┬───────────────┬──────────────────┐
+│           Action           │ System Stability │ Data Safety │ Reversibility │  Recommendation  │
+├────────────────────────────┼──────────────────┼─────────────┼───────────────┼──────────────────┤
+│ Wait for kernel update     │ ✅ None          │ ✅ None     │ ✅ N/A        │ DO THIS          │
+├────────────────────────────┼──────────────────┼─────────────┼───────────────┼──────────────────┤
+│ Try newer kernel (6.15-rc) │ ⚠️ Low           │ ✅ None     │ ✅ Easy       │ Worth trying     │
+├────────────────────────────┼──────────────────┼─────────────┼───────────────┼──────────────────┤
+│ Custom kernel build        │ ⚠️ Low           │ ✅ None     │ ✅ Easy       │ If comfortable   │
+├────────────────────────────┼──────────────────┼─────────────┼───────────────┼──────────────────┤
+│ EC register probing        │ ⚠️ Medium        │ ⚠️ Low      │ ⚠️ Maybe      │ Not recommended  │
+├────────────────────────────┼──────────────────┼─────────────┼───────────────┼──────────────────┤
+│ ACPI override              │ ⚠️ Medium        │ ✅ None     │ ✅ Easy       │ Only if expert   │
+├────────────────────────────┼──────────────────┼─────────────┼───────────────┼──────────────────┤
+│ GPIO forcing               │ ⚠️ Low           │ ✅ None     │ ✅ Easy       │ Camera may break │
+└────────────────────────────┴──────────────────┴─────────────┴───────────────┴──────────────────┘
+---
+The Hard Truth
+
+Why This Isn't Easily Solvable
+
+1. Vendor lock-in: Samsung uses undocumented EC commands for audio power management
+2. No Windows reference: Without dual-boot, you can't capture what Windows does
+3. Lunar Lake is new: Intel's latest platform has limited Linux audio support
+4. MAX98390 is I2C amp: More complex than simple HDA-connected amps
+
+What Would Actually Solve This
+
+One of these needs to happen:
+- Samsung releases documentation (extremely unlikely)
+- Someone with Windows captures EC traffic and shares it
+- Kernel developers add quirk for 0x144dca08 to snd_hda_intel
+- SOF project adds Lunar Lake + MAX98390 machine driver
+
+---
+Recommended Action Plan
+
+Immediate (Low Risk)
+
+1. File/update GitHub issue at samsung-galaxybook-extras with your complete findings
+2. Subscribe to the existing issue about Galaxy Book5 Pro speaker sound
+3. Check kernel 6.15-rc for Samsung audio patches
+4. Try Ubuntu 25.10 daily when available (newer kernel)
+
+Short-term (Low Risk)
+
+5. Test with Fedora 42 live USB (often has newer audio patches)
+6. Post to alsa-devel with your detailed findings
+7. Monitor SOF GitHub issues #4055 and related
+
+Medium-term (Medium Risk)
+
+8. Build kernel with Samsung audio patch if upstream doesn't merge soon
+9. Try disabling INT3472 to free gpio-569 (will break camera)
+
+Not Recommended
+
+- EC register manipulation without Windows reference data
+- Random ACPI overrides
+- Forcing driver bindings manually
+
+---
+Conclusion
+
+Your speakers are almost certainly physically present but powered off due to missing Linux support for Samsung's proprietary power management. This is a known issue affecting multiple Samsung Galaxy Book models with MAX98390 amplifiers.
+
+The solution requires kernel-level changes that are in progress upstream. Your best path forward is:
+1. Use headphones/external speakers for now
+2. Engage with the community (your investigation data is valuable)
+3. Wait for kernel updates or test newer kernels
+
+This is not a configuration problem you can fix with commands. It requires driver/firmware work that's beyond end-user scope.
